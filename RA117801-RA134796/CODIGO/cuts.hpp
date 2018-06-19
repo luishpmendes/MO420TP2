@@ -27,8 +27,8 @@ ILOUSERCUTCALLBACK2(Cuts, IloBoolVarArray, x, const Instance &, inst) {
   std::vector<IloExpr> OCcut(0), STcut(0);
   std::vector<double> OCrhs(0), STrhs(0);
 
-  occuts(x, inst, OCcut, OCrhs);
-  stcuts(x, inst, STcut, STrhs);
+  occuts(env, x, val, inst, OCcut, OCrhs);
+  stcuts(env, x, val, inst, STcut, STrhs);
 
   for (int i = 0; i < (int) OCcut.size(); i++) {
       add(OCcut[i] <= OCrhs[i]);
