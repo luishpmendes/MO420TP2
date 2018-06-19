@@ -17,7 +17,7 @@ int main(int argc, char  ** argv) {
   assert(inst.conflicts[1].first==1);
   assert(inst.conflicts[1].second==8);
   assert(inst.conflictsByEdge[12].size()==2);
-  assert(inst.conflictsByEdge[12][0]==9);
+  assert(inst.conflictsByEdge[12][0]==3);
 
   assert(inst.minWeightEdgeId==4);
 }
