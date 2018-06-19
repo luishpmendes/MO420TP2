@@ -9,7 +9,6 @@
 #include <string>
 #include <set>
 
-
 typedef std:: pair<int,int> pii;
 class Edge {
   public:
@@ -18,7 +17,6 @@ class Edge {
     u = std::min(_u, _v);
     v = std::max(_u, _v);
   }
-  
 
   bool operator < (const Edge & e) const {
     if(u < e.u)
@@ -37,14 +35,13 @@ class Edge {
   }
 };
 
-
 class ConflictGraph {
   public:
   std::vector<pii> conflictsList;
   std::vector<std::set<int>> conflictsByEdge;
   std::vector<std::set<int>> conflictsAdj;
 
-  int resize(int m) {
+  void resize(int m) {
     conflictsByEdge.resize(m);
     conflictsAdj.resize(m);
   }
@@ -81,7 +78,6 @@ class Instance {
   int minWeightEdgeId;
   int maxEdgeWeight;
 
-
   ConflictGraph conflictGraph;
   std::vector<std::pair<int,int>> conflicts; // pares (por id) bloqueados
   std::set<std::pair<int,int>> conflictsSet;
@@ -89,6 +85,14 @@ class Instance {
   std::vector<std::vector<int>> conflictsGraph;//edge id -> edge id
   
   std::string name;
+
+  int getOtherVertice(int u, int e) {
+    if (u == edges[e].u) {
+        return edges[e].v;
+    }
+
+    return edges[e].u;
+  }
 
   void load(const char * filename) {
     std::ifstream fs;
@@ -153,8 +157,8 @@ class Instance {
     }
 
     minWeightEdgeId = -1;
-    for(int i = 0 ; i < edges.size(); i++){
-      if(conflictsByEdge[i].size() == 0)
+    for (int i = 0 ; i < (int) edges.size(); i++){
+      if (conflictsByEdge[i].size() == 0)
         continue;
         
       if(minWeightEdgeId == -1 || cost[minWeightEdgeId] > cost[i])
@@ -162,5 +166,4 @@ class Instance {
     }
   }
 };
-
 
