@@ -2,6 +2,8 @@
 #include "ilcplex/ilocplex.h"
 #include "instance.hpp"
 #include "params.hpp"
+#include "solution.hpp"
+#include <chrono>
 
 class BNCSolver {
   protected:
@@ -14,7 +16,13 @@ class BNCSolver {
   Params _params;
 
   Instance _inst;
-  //Params _params;
+  
+  Solution _solution;
+
+  std::chrono::time_point<std::chrono::high_resolution_clock> startTime, endTime;
+
+  bool _primalViable;
+
   void createPairConflicts();
   void createCliqueConflicts();
   void createBaseModel();
@@ -22,6 +30,11 @@ class BNCSolver {
   void createPrimalHeuristic();
 
   void config();
+
+  void processSolution();
+  void updateReport();
   public:
-  void solve(const Instance & inst, const Params & params);//, const Params & params;
+  void solve(const Instance & inst, const Params & params);
+  bool isPrimalViable() const;
+  Solution getSolution() const;
 };  

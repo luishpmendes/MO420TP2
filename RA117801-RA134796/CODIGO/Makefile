@@ -10,12 +10,12 @@ lflags  = -L$(cplex)/lib/x86-64_linux/static_pic -L$(concert)/lib/x86-64_linux/s
 all_tests: instance_test report_test bnc
 
 instance_test: instance_test.cpp instance.hpp
-	g++ $(dflags) instance_test.cpp -o instance_test
+	g++ $(dflags) instance_test.cpp $(iflags) -o instance_test
 
 report_test: instance_test report_test.cpp report.hpp  solution.hpp
-	g++ $(dflags) report_test.cpp -o report_test
+	g++ $(dflags) report_test.cpp $(iflags) -o report_test
 
-bnc : bnc.cpp report_test instance_test solver.cpp
+bnc : bnc.cpp report_test instance_test solver.cpp cuts.hpp stcut.hpp occut.hpp global.hpp  params.hpp primalheur.hpp
 	g++ $(dflags) bnc.cpp solver.cpp $(iflags) $(lflags) -o bnc 
 
 clean:

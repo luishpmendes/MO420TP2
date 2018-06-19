@@ -1,7 +1,7 @@
 #include "solver.hpp"
-#include "stcut.hpp"
-#include "occut.hpp"
+#include "cuts.hpp"
 #include "primalheur.hpp"
+#include "global.hpp"
 
 void BNCSolver::createBaseModel() {
   _model = IloModel(_env);
@@ -65,8 +65,7 @@ void BNCSolver::config() {
 }
 
 void BNCSolver::createCuts() {
-  _cplex.use(STCut(_env, _x, _inst));
-  _cplex.use(OCCut(_env, _x, _inst));
+  _cplex.use(Cuts(_env, _x, _inst));
   std::cerr << "cuts enabled" << std::endl;
 }
 
@@ -75,10 +74,35 @@ void BNCSolver::createPrimalHeuristic() {
     std::cerr << "primal heuristic enabled" << std::endl;
 }
 
+void BNCSolver::processSolution() {
+  if(_cplex.solve()) {
+    IloNumArray xstar(_env);
+    _cplex.getValues(xstar, _x);
+    _primalViable = true;
+    _solution.fromIloNumArray(xstar, _inst);
+    gReport.bestPrimalBound = _solution.value;
+  }
+  else {
+    _primalViable = false;
+    _solution.invalid = true;
+    gReport.bestPrimalBound = -INF;
+  }
+}
+
+void BNCSolver::updateReport() {
+  gReport.numNodes = _cplex.getNnodes();
+  gReport.bestPrimalNode = _cplex.getIncumbentNode();
+
+  gReport.bestDualBound = _cplex.getBestObjValue();
+
+  gReport.totalTime =
+    std::chrono::duration_cast<std::chrono::duration<double>>(endTime-startTime).count();
+}
 void BNCSolver::solve(const Instance & inst, const Params & params) {
+
   _inst = inst;
   _params = params;
-
+  startTime = std::chrono::high_resolution_clock::now();
   createBaseModel();
   if(params.typeExec == 'c')
     createCuts();
@@ -87,10 +111,18 @@ void BNCSolver::solve(const Instance & inst, const Params & params) {
     createPrimalHeuristic();
 
   config();
-  _cplex.exportModel("lp.lp");
+  _cplex.exportModel("lp.lp"); 
+  processSolution();
+  endTime = std::chrono::high_resolution_clock::now();
+  updateReport();
+}
 
-  if(_cplex.solve()) {
-    std::cout << "Solução: " << _cplex.getObjValue() << std::endl;
-  }
+bool BNCSolver::isPrimalViable() const {
+  return _primalViable;
+}
+
+Solution BNCSolver::getSolution() const{
+  return _solution;
+
 }
 

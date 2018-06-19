@@ -12,7 +12,10 @@
 #include "report.hpp"
 #include "solver.hpp"
 
+#include "global.hpp"
 
+Report gReport;
+Info gInfo;
 
 int main (int argc, char * argv[]) {
     if (argc != 6) {
@@ -52,7 +55,9 @@ int main (int argc, char * argv[]) {
 
     BNCSolver solver;
     solver.solve(inst, params);
-    //report.write(params, "output.out");
+    solver.getSolution().write(inst, params.filename+".sol");
+    gReport.write(params, params.filename+".est");
+    //gInfo.write(filename+".info");
     return 0;
 }
 
