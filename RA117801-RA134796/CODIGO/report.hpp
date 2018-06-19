@@ -1,4 +1,5 @@
-//output information and extra info used to generate graphs and tables
+//output information and extra info used to generate graphs and table
+#pragma once
 #include <utility>
 #include <string>
 #include <vector>
@@ -19,7 +20,7 @@ std::string to_string(std::vector<T> vec) {
 class Report {
   public:
   int totalSTCuts;
-  int totalOCICuts;
+  int totalOCCuts;
   
   double firstDualBound;
   double rootDualBound;
@@ -31,9 +32,40 @@ class Report {
   double bestDualBound;
 
   double totalTime;
+
+  Report() {
+    totalSTCuts = 0;
+    totalOCCuts = 0;
+
+    firstDualBound = -INF;
+    rootDualBound  = -INF;
+
+    numNodes = 0;
+    bestPrimalNode = -1;
+  
+    bestPrimalBound = INF;
+    bestDualBound = -INF;
+
+    totalTime = 0;
+  }
+
   std::string toString(const Params & params) const{
     std::string ret = "";
+    //ret += params.toString() + "\n";
+    ret += std::to_string(totalSTCuts) + "\n";
+    ret += std::to_string(totalOCCuts) + "\n";
+
+    ret += std::to_string(firstDualBound) + "\n";
+    ret += std::to_string(rootDualBound) + "\n";
+
+    ret += std::to_string(numNodes) + "\n";
+    ret += std::to_string(bestPrimalNode) + "\n";
+
     
+    ret += std::to_string(bestPrimalBound) + "\n";
+    ret += std::to_string(bestDualBound) + "\n";
+
+    ret += std::to_string(totalTime) + "\n";
     return ret;
   }
 
@@ -51,9 +83,13 @@ class Info {
   int fixedOnes, fixedZeros;
   int addedConflicts, removedConflicts;
 
+  //do not print
+  int iterSep;
+  bool firstNode;
   Info() {
     fixedOnes = fixedZeros = addedConflicts = removedConflicts = 0;
-
+    iterSep = 0;
+    firstNode = true;
   }
   std::string toString(){
     std::string ret =  "";
