@@ -24,8 +24,7 @@ class Solution {
 
 
   void fromIloNumArray(const IloNumArray & vals, const Instance & inst) {
-    vars.clear();
-    value = 0;
+    clear();
     for(int i = 0; i < inst.edges.size(); i++) {
       if(vals[i] > 0.5) {
          value += inst.cost[i];
@@ -35,8 +34,7 @@ class Solution {
   }
 
   void fromIncidence(const std::vector<int> & x, const Instance & inst) {
-    vars.clear();
-    value = 0;
+    clear();
     for(int i = 0; i < x.size(); i++) {
       if(x[i] == 1) {
         value += inst.cost[i];
@@ -73,8 +71,8 @@ class Solution {
         ret += "-1 -1\n";
       return ret;
     }
-      if(printValue)
-        ret += std::to_string(value)+"\n";
+    if(printValue)
+      ret += std::to_string(value)+"\n";
     for(int i = 0; i < vars.size(); i++) {
       if(vars[i] > threshold) {
         ret += inst.edges[vars[i]].toString();
