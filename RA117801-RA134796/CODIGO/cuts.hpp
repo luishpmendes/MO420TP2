@@ -1,6 +1,8 @@
 #include "ilcplex/ilocplex.h"
 #include "instance.hpp"
 #include "global.hpp"
+#include "occut.hpp"
+#include "stcut.hpp"
 
 ILOUSERCUTCALLBACK2(Cuts, IloBoolVarArray, x, const Instance &, inst) {
   IloEnv env = getEnv();
@@ -22,4 +24,19 @@ ILOUSERCUTCALLBACK2(Cuts, IloBoolVarArray, x, const Instance &, inst) {
   }
   gInfo.iterSep++;
 
+  std::vector<IloExpr> OCcut(0), STcut(0);
+  std::vector<double> OCrhs(0), STrhs(0);
+
+  occuts(x, inst, OCcut, OCrhs);
+  stcuts(x, inst, STcut, STrhs);
+
+  for (int i = 0; i < (int) OCcut.size(); i++) {
+      add(OCcut[i] <= OCrhs[i]);
+      gReport.totalOCCuts++;
+  }
+
+  for (int i = 0; i < (int) STcut.size(); i++) {
+      add(STcut[i] <= STrhs[i]);
+      gReport.totalSTCuts++;
+  }
 }
