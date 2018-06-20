@@ -18,19 +18,24 @@ class SPSolver {
 
 class DijkstraSPSolver : public SPSolver {
     public :
-        void solve (Instance * inst, const unsigned int & s, std::vector<double> & d, 
-                std::vector<int> & pi) {
-            d = std::vector<double> (inst->size, INF);
-            pi = std::vector<int> (inst->size, NIL);
+        void solve (Instance * inst, const unsigned int & source, 
+                const unsigned int & destination, std::vector<double> & distance, 
+                std::vector<int> & predecessor) {
+            distance = std::vector<double> (inst->size, INF);
+            predecessor = std::vector<int> (inst->size, NIL);
             std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, 
                 std::greater<std::pair<int, int>>> Q;
 
-            d[s] = 0;
-            Q.push(std::make_pair(0, s));
+            distance[source] = 0;
+            Q.push(std::make_pair(0, source));
 
             while (!Q.empty()) {
-                int u = Q.top().second;
+                unsigned int u = Q.top().second;
                 Q.pop();
+
+                if (u == destination) {
+                    break;
+                }
 
                 for (std::vector<int>::iterator it = inst->adjList[u].begin(); 
                         it != inst->adjList[u].end(); it++) {
@@ -38,10 +43,10 @@ class DijkstraSPSolver : public SPSolver {
                     int v = inst->getOtherVertice(u, e);
                     double w = inst->cost[inst->edge2id[Edge(u, v)]];
                     
-                    if (d[v] > d[u] + w) {
-                        d[v] = d[u] + w;
-                        pi[v] = u;
-                        Q.push(std::make_pair(d[v], v));
+                    if (distance[v] > distance[u] + w) {
+                        distance[v] = distance[u] + w;
+                        predecessor[v] = u;
+                        Q.push(std::make_pair(distance[v], v));
                     }
                 }
             }
