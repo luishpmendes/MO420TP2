@@ -10,6 +10,10 @@ ILOUSERCUTCALLBACK2(Cuts, IloBoolVarArray, x, const Instance &, inst) {
   IloNumArray val(env);
   getValues(val, x);
 
+  std::vector<double> valVecDouble(inst.edges.size());
+  for(int i = 0; i < inst.edges.size(); i++)
+    valVecDouble[i] = (double)val[i];
+
   NodeId node = getNodeId();
   double lpobjval = getObjValue();
   std::cerr << "generating cuts" << std::endl;
@@ -24,19 +28,20 @@ ILOUSERCUTCALLBACK2(Cuts, IloBoolVarArray, x, const Instance &, inst) {
   }
   gInfo.iterSep++;
 
-  std::vector<IloExpr> OCcut(0), STcut(0);
-  std::vector<double> OCrhs(0), STrhs(0);
-
-  occuts(env, x, val, inst, OCcut, OCrhs);
-  stcuts(env, x, val, inst, STcut, STrhs);
-
-  for (int i = 0; i < (int) OCcut.size(); i++) {
-      add(OCcut[i] <= OCrhs[i]);
+  for(const std::vector<int> & w : getSubTours(inst, valVecDouble)) {
+      IloExpr lhs(env);
+      //find edges between vertices of w
+      for(int i = 0; i < w.size(); i++) {
+        for(int j = i+1; j < w.size(); j++) {
+          int u = w[i];
+          int v = w[j];
+          std::map<Edge, int>::const_iterator it = inst.edge2id.find(Edge(u, v));
+          if(it != inst.edge2id.end())//found
+            lhs  += x[it->second];
+        }
+      }
+      int rhs = w.size()-1;
+      add(lhs <= rhs);
       gReport.totalOCCuts++;
-  }
-
-  for (int i = 0; i < (int) STcut.size(); i++) {
-      add(STcut[i] <= STrhs[i]);
-      gReport.totalSTCuts++;
   }
 }

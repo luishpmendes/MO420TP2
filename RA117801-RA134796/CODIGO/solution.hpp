@@ -74,14 +74,13 @@ class Solution {
     if(printValue)
       ret += std::to_string(value)+"\n";
     for(int i = 0; i < vars.size(); i++) {
-      if(vars[i] > threshold) {
-        ret += inst.edges[vars[i]].toString();
-        if(printValue) {
-          ret += " "+std::to_string(vars[i]);
-        }
-        ret += "\n";
+      ret += inst.edges[vars[i]].toString();
+      if(printValue) {
+        ret += " "+std::to_string(inst.cost[vars[i]]);
       }
+      ret += "\n";
     }
+    
     return ret;
   }
 

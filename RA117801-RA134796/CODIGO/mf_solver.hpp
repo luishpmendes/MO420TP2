@@ -26,14 +26,14 @@ struct FlowEdge
               // we can quickly find it.
 };
  
-// Residual Graph
-class Graph
+// Residual FlowGraph
+class FlowGraph
 {
     int _n; // number of vertex
     std::vector<int> _level ; // stores level of a node
     std::vector<std::vector<FlowEdge >> _adj;
-public :
-    Graph(int n)
+public:
+    FlowGraph(int n)
     {
         _n = n;
         _adj = std::vector<std::vector<FlowEdge>>(n);
@@ -56,11 +56,14 @@ public :
     bool BFS(int s, int t);
     double sendFlow(int s, double flow, int t, std::vector<int> &start);
     double DinicMaxflow(int s, int t);
+    
+    std::vector<int> getCutSide(int s);
+    int CutDFS(int u, std::vector<bool> & vis);
 };
  
 // Finds if more flow can be sent from s to t.
 // Also assigns levels to nodes.
-bool Graph::BFS(int s, int t)
+bool FlowGraph::BFS(int s, int t)
 {
     for (int i = 0 ; i < _n ; i++)
         _level[i] = -1;
@@ -106,7 +109,7 @@ bool Graph::BFS(int s, int t)
 //           from i.
 //  u : Current vertex
 //  t : Sink
-double Graph::sendFlow(int u, double flow, int t, std::vector<int> &start)
+double FlowGraph::sendFlow(int u, double flow, int t, std::vector<int> &start)
 {
     // Sink reached
     if (u == t)
@@ -142,7 +145,7 @@ double Graph::sendFlow(int u, double flow, int t, std::vector<int> &start)
 }
  
 // Returns maximum flow in graph
-double Graph::DinicMaxflow(int s, int t)
+double FlowGraph::DinicMaxflow(int s, int t)
 {
     // Corner case
     if (s == t)
@@ -170,4 +173,34 @@ double Graph::DinicMaxflow(int s, int t)
  
     // return maximum flow
     return total;
+}
+
+// returns one of the subsets of vertices separated by the cut
+std::vector<int> FlowGraph::getCutSide(int s) {
+  std::vector<int> subtour;
+
+  std::vector<bool> vis(_n, false);
+  int count = CutDFS(s, vis);
+  bool mask = true;
+  if(count < 3)
+    mask = false;
+  
+  for(int u = 0;  u < _n; u++) {
+    if(vis[u] == mask)
+      subtour.push_back(u);
+  }
+  return subtour;
+}
+
+// visit all nodes reachable from u without crossing a cut edge
+int FlowGraph::CutDFS(int u, std::vector<bool> & vis) {
+  if(vis[u] == true)
+    return 0;
+  int count = 1;
+  vis[u] = true;
+  for(const FlowEdge & e : _adj[u]) {
+    if(e.C > EPS && e.flow+EPS < e.C)
+      count += CutDFS(e.v, vis);
+  }
+  return count;
 }

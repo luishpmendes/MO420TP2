@@ -17,8 +17,8 @@ class Params {
   std::string filename;
 
   Params() {
-    typeExec = 'e';
-    model = 'c';
+    typeExec = 'c';
+    model = 'n';
     timeLimit = 60;
     heurPrimal = false;
   }
