@@ -21,9 +21,12 @@ sp_solver_test: instance_test sp_solver.hpp sp_solver_test.cpp
 mf_solver_test: instance_test mf_solver.hpp mf_solver_test.cpp
 	g++ $(dflags) mf_solver_test.cpp $(iflags) -o mf_solver_test
 
-bnc : bnc.cpp report_test instance_test sp_solver_test  mf_solver_test solver.cpp cuts.hpp stcut.hpp occut.hpp global.hpp params.hpp primalheur.hpp
+mc_solver_test: instance_test mc_solver.hpp mc_solver_test.cpp
+	g++ $(dflags) mc_solver_test.cpp $(iflags) -o mc_solver_test
+
+bnc : bnc.cpp report_test instance_test sp_solver_test mf_solver_test mc_solver_test solver.cpp cuts.hpp stcut.hpp occut.hpp global.hpp params.hpp primalheur.hpp
 	g++ $(dflags) bnc.cpp solver.cpp $(iflags) $(lflags) -o bnc 
 
 clean:
-	rm -f bnc instance_test report_test sp_solver_test mf_solver_test *.o
+	rm -f bnc instance_test report_test sp_solver_test mf_solver_test mc_solver_test *.o
 
