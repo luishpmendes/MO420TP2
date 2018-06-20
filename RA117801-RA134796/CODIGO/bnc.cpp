@@ -1,4 +1,3 @@
-#pragma once
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
@@ -18,10 +17,6 @@ Report gReport;
 Info gInfo;
 
 int main (int argc, char * argv[]) {
-    if (argc != 6) {
-        std::cerr << "Invalid arguments!" << std::endl;
-        exit(EXIT_FAILURE);
-    }
     Params params;
 
 
