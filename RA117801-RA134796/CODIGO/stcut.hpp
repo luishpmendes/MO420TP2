@@ -14,7 +14,6 @@ std::vector<std::vector<int>> getSubTours(const Instance & inst,
     g.addFlowEdge(inst.edges[i].u, inst.edges[i].v, frac[i]);
     g.addFlowEdge(inst.edges[i].v, inst.edges[i].u, frac[i]);
   }
-
   
   for(int t = 1; t < inst.size; t++) {
     FlowGraph h = g;

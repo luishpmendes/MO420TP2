@@ -28,7 +28,6 @@ ILOUSERCUTCALLBACK2(Cuts, IloBoolVarArray, x, const Instance &, inst) {
   }
   gInfo.iterSep++;
 
-  
   for(const std::vector<int> & w : getSubTours(inst, valVecDouble)) {
       IloExpr lhs(env);
       //find edges between vertices of w
