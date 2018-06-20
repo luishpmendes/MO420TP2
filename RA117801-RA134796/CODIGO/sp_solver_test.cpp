@@ -12,7 +12,7 @@ int main () {
     std::vector<int> pi;
 
     DijkstraSPSolver spSolver;
-    spSolver.solve(&inst, 0, d, pi);
+    spSolver.solve(&inst, 0, 9, d, pi);
 
     assert(d[1] == 1);
     assert(pi[1] == 0);

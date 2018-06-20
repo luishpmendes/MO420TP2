@@ -42,6 +42,27 @@ ILOUSERCUTCALLBACK2(Cuts, IloBoolVarArray, x, const Instance &, inst) {
       }
       int rhs = w.size()-1;
       add(lhs <= rhs);
-      gReport.totalOCCuts++;
+      gReport.totalSTCuts++;
+  }
+
+  std::set<std::set<unsigned int>> oddCycles;
+
+  occuts(val, inst, oddCycles);
+
+  for (std::set<std::set<unsigned int>>::iterator it = oddCycles.begin(); it != oddCycles.end(); it++) {
+    std::set<unsigned int> oddCycle = (*it);
+
+    IloExpr lhs (env);
+    double rhs = (((double) oddCycle.size()) - 1.0) / 2.0;
+
+    for (std::set<unsigned int>::iterator it2 = oddCycle.begin(); it2 != oddCycle.end(); it2++) {
+      unsigned int i = (*it2);
+
+      lhs += x[i];
+    }
+
+    add(lhs <= rhs);
+    gReport.totalOCCuts++;
   }
 }
+
