@@ -4,6 +4,7 @@
 #include "params.hpp"
 #include "solution.hpp"
 #include <chrono>
+#include "variable_fixer.hpp"
 
 class BNCSolver {
   protected:
@@ -21,6 +22,8 @@ class BNCSolver {
 
   std::chrono::time_point<std::chrono::high_resolution_clock> startTime, endTime;
 
+  std::set<int> _fixedOnes, _fixedZeros;
+  std::vector<VariableFixer*> _preprocessors;
   bool _primalViable;
 
   void createPairConflicts();
@@ -29,6 +32,10 @@ class BNCSolver {
   void createCuts();
   void createPrimalHeuristic();
 
+  void fixOne(int edge);
+  void fixZero(int edge);
+
+  void runPreprocessors();
   void config();
 
   void processSolution();

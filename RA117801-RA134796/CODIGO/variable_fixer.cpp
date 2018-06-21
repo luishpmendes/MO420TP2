@@ -1,27 +1,27 @@
-#include "lagrangean_solver.hpp"
 #include "variable_fixer.hpp"
 #include "mergefind.hpp"
+#include <algorithm> 
 
-void LightEdgePreprocessor::fixVariables(void *solver) {
+void LightEdgePreprocessor::fixVariables(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros) {
   //local conflcits graphs
-  LagrangeanSolver *lsolver= (LagrangeanSolver*)solver;
-  std::vector<std::set<int>> conflictsGraph(lsolver->inst->edges.size());
+  std::vector<std::set<int>> conflictsGraph(inst.edges.size());
   std::vector<std::pair<int,int>> wid;
   std::set<int> active;
-  for(int e = 0; e < lsolver->inst->edges.size();e++) {
-    if(lsolver->fixedOnes.count(e)) {
+  for(int e = 0; e < inst.edges.size();e++) {
+    if(fixedOnes.count(e)) {
       wid.push_back(std::pair<int, int>(-1, e));
     }
-    else if(lsolver->fixedZeros.count(e)) {
+    else if(fixedZeros.count(e)) {
       continue;
     }
     else {
-      wid.push_back(std::pair<int, int>(lsolver->inst->cost[e], e));
+      wid.push_back(std::pair<int, int>(inst.cost[e], e));
     }
     active.insert(e);
   }
   for(int e : active) {
-    for(int f : lsolver->inst->conflictsGraph[e]) {
+    for(int f : inst.conflictsGraph[e]) {
       if(active.count(f)) 
         conflictsGraph[e].insert(f);
     }
@@ -32,7 +32,7 @@ void LightEdgePreprocessor::fixVariables(void *solver) {
   bool change =  true;
   int maxFixedValue=-1;
   int maxFixedI = -1;
-  MergeFind mergeFind(lsolver->inst->size);
+  MergeFind mergeFind(inst.size);
   ones.clear();
   zeros.clear();
 
@@ -48,9 +48,9 @@ void LightEdgePreprocessor::fixVariables(void *solver) {
         continue;
       }
       if(conflictsGraph[wid[i].second].size() == 0) { // no conflict 
-        if(mergeFind.merge(lsolver->inst->edges[wid[i].second].u,
-            lsolver->inst->edges[wid[i].second].v)) {
-          if(lsolver->fixedOnes.count(wid[i].second) == 0)
+        if(mergeFind.merge(inst.edges[wid[i].second].u,
+            inst.edges[wid[i].second].v)) {
+          if(fixedOnes.count(wid[i].second) == 0)
             ones.insert(wid[i].second);
         }
         else { //cycle
@@ -72,8 +72,8 @@ void LightEdgePreprocessor::fixVariables(void *solver) {
     //updates conflicts
     std::vector<int> temp;
     for(int e : active) {
-      if(mergeFind.find(lsolver->inst->edges[e].u) == 
-          mergeFind.find(lsolver->inst->edges[e].v)) {
+      if(mergeFind.find(inst.edges[e].u) == 
+          mergeFind.find(inst.edges[e].v)) {
         zeros.insert(e);
         for(int f : conflictsGraph[e]) {
           conflictsGraph[f].erase(e);
@@ -106,9 +106,9 @@ void BridgePreprocessor::dfs(int u, int parent, const std::set<int> & czeros) {
 }
 
 
-bool BridgePreprocessor::identifyBridges(void *solver) {
+bool BridgePreprocessor::identifyBridges(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros) {
     bool change = false;
-    LagrangeanSolver *lsolver= (LagrangeanSolver*)solver;
     dfsNum.assign(adjGraph.size(), -1);
     dfsLow.assign(adjGraph.size(), 0);
     dfsCounter = 0;
@@ -119,14 +119,14 @@ bool BridgePreprocessor::identifyBridges(void *solver) {
       //não-conexo
     }
     for(int b : curBridges) {
-      if(ones.count(b) == 0 && lsolver->fixedOnes.count(b) == 0) {
+      if(ones.count(b) == 0 && fixedOnes.count(b) == 0) {
         change = true;
         ones.insert(b);
-        for(int f : lsolver->inst->conflictsGraph[b]) {
-          adjGraph[lsolver->inst->edges[f].u].erase(
-            std::pair<int,int>(lsolver->inst->edges[f].v, f));
-          adjGraph[lsolver->inst->edges[f].v].erase(
-            std::pair<int,int>(lsolver->inst->edges[f].u, f));
+        for(int f : inst.conflictsGraph[b]) {
+          adjGraph[inst.edges[f].u].erase(
+            std::pair<int,int>(inst.edges[f].v, f));
+          adjGraph[inst.edges[f].v].erase(
+            std::pair<int,int>(inst.edges[f].u, f));
           zeros.insert(f);
         }
       }
@@ -134,16 +134,16 @@ bool BridgePreprocessor::identifyBridges(void *solver) {
   return change;
 }
 
-bool BridgePreprocessor::identifyInfeasibleEdges(void *solver) {
-  LagrangeanSolver *lsolver= (LagrangeanSolver*)solver;
+bool BridgePreprocessor::identifyInfeasibleEdges(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros) {
   bool change = false;
-  for(int e = 0; e < lsolver->inst->edges.size(); e++) {
-    if(ones.count(e) || lsolver->fixedOnes.count(e) ||
-       zeros.count(e) || lsolver->fixedZeros.count(e) ||
-       lsolver->inst->conflictsGraph[e].size() == 0)
+  for(int e = 0; e < inst.edges.size(); e++) {
+    if(ones.count(e) || fixedOnes.count(e) ||
+       zeros.count(e) || fixedZeros.count(e) ||
+       inst.conflictsGraph[e].size() == 0)
       continue;
     std::set<int> econf;
-    for(int f : lsolver->inst->conflictsGraph[e]) {
+    for(int f : inst.conflictsGraph[e]) {
       econf.insert(f);
     }
     while(true) {
@@ -154,16 +154,16 @@ bool BridgePreprocessor::identifyInfeasibleEdges(void *solver) {
       dfs(0, -1, econf);
       if(dfsCounter != adjGraph.size()) {
         change = true;
-        adjGraph[lsolver->inst->edges[e].u].erase(
-          std::pair<int,int>(lsolver->inst->edges[e].v, e));
-        adjGraph[lsolver->inst->edges[e].v].erase(
-          std::pair<int,int>(lsolver->inst->edges[e].u, e));
+        adjGraph[inst.edges[e].u].erase(
+          std::pair<int,int>(inst.edges[e].v, e));
+        adjGraph[inst.edges[e].v].erase(
+          std::pair<int,int>(inst.edges[e].u, e));
         zeros.insert(e);
         break;
       }
       int numFixedBefore = econf.size();
       for(int b : curBridges) {
-        for(int f : lsolver->inst->conflictsGraph[b]) {
+        for(int f : inst.conflictsGraph[b]) {
           econf.insert(f);
         }
       }
@@ -173,31 +173,32 @@ bool BridgePreprocessor::identifyInfeasibleEdges(void *solver) {
   }
   return change;
 }
-bool BridgePreprocessor::identifyConflicts(void *solver) {
+bool BridgePreprocessor::identifyConflicts(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros) {
   curConflicts.clear();
   return false;
 }
-void BridgePreprocessor::fixVariables(void *solver) {
-  LagrangeanSolver *lsolver= (LagrangeanSolver*)solver;
+void BridgePreprocessor::fixVariables(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros) {
   zeros.clear();
   ones.clear();
   //construct adjGraph
   adjGraph.clear();
-  adjGraph.resize(lsolver->inst->size);
-  for(int e = 0; e < lsolver->inst->edges.size(); e++) {
-    if(lsolver->fixedZeros.count(e) == 0) {
-      adjGraph[lsolver->inst->edges[e].u].insert(
-        std::pair<int,int>(lsolver->inst->edges[e].v, e));
-      adjGraph[lsolver->inst->edges[e].v].insert(
-        std::pair<int,int>(lsolver->inst->edges[e].u, e));
+  adjGraph.resize(inst.size);
+  for(int e = 0; e < inst.edges.size(); e++) {
+    if(fixedZeros.count(e) == 0) {
+      adjGraph[inst.edges[e].u].insert(
+        std::pair<int,int>(inst.edges[e].v, e));
+      adjGraph[inst.edges[e].v].insert(
+        std::pair<int,int>(inst.edges[e].u, e));
     }
   }
   bool change = true;
   while(change) {
     change = false;
-    if(identifyBridges(solver))
+    if(identifyBridges(inst, fixedOnes, fixedZeros))
       change = true;
-    if(identifyInfeasibleEdges(solver))
+    if(identifyInfeasibleEdges(inst, fixedOnes, fixedZeros))
       change = true; 
   }
 };

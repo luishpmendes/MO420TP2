@@ -7,7 +7,7 @@ rflags  = -DIL_STD -o3 -std=c++11
 iflags = -I$(cplex)/include -I$(concert)/include
 lflags  = -L$(cplex)/lib/x86-64_linux/static_pic -L$(concert)/lib/x86-64_linux/static_pic -lconcert -lilocplex -lcplex -lpthread -ldl
 
-all_tests: instance_test report_test sp_solver_test mf_solver_test bnc
+all_tests: instance_test report_test sp_solver_test mf_solver_test preprocessor_test bnc
 
 instance_test: instance_test.cpp instance.hpp
 	g++ $(dflags) instance_test.cpp $(iflags) -o instance_test
@@ -21,9 +21,12 @@ sp_solver_test: instance_test sp_solver.hpp sp_solver_test.cpp
 mf_solver_test: instance_test mf_solver.hpp mf_solver_test.cpp
 	g++ $(dflags) mf_solver_test.cpp $(iflags) -o mf_solver_test
 
-bnc : bnc.cpp report_test instance_test sp_solver_test  mf_solver_test solver.cpp cuts.hpp stcut.hpp occut.hpp global.hpp params.hpp primalheur.hpp
-	g++ $(dflags) bnc.cpp solver.cpp $(iflags) $(lflags) -o bnc 
+preprocessor_test: instance_test variable_fixer.hpp variable_fixer.cpp preprocessor_test.cpp
+	g++ $(dflags) preprocessor_test.cpp variable_fixer.cpp $(iflags) -o preprocessor_test
+
+bnc : bnc.cpp report_test instance_test sp_solver_test  mf_solver_test preprocessor_test solver.cpp cuts.hpp stcut.hpp occut.hpp global.hpp params.hpp primalheur.hpp
+	g++ $(dflags) bnc.cpp solver.cpp variable_fixer.cpp $(iflags) $(lflags) -o bnc 
 
 clean:
-	rm -f bnc instance_test report_test sp_solver_test mf_solver_test *.o
+	rm -f bnc instance_test report_test sp_solver_test mf_solver_test preprocessor *.o
 

@@ -42,6 +42,46 @@ void BNCSolver::createCliqueConflicts() {
   std::cerr << "clique" << std::endl;
 }
 
+
+void BNCSolver::fixOne(int edge) {
+  if(_fixedOnes.count(edge) > 0)
+    return;
+
+  _fixedOnes.insert(edge);
+  //TODO
+  _x[edge].setLB(1);
+  std::cerr << "Fixed One " << (int)edge << std::endl;
+}
+
+void BNCSolver::fixZero(int edge) {
+  if(_fixedZeros.count(edge) > 0)
+    return;
+
+  _fixedZeros.insert(edge);
+  //TODO
+  _x[edge].setUB(0);
+  std::cerr << "Fixed Zero " << (int)edge  << std::endl;
+
+}
+
+void BNCSolver::runPreprocessors() {
+  bool change = true;
+  while(change) {
+    change = false;
+    for(auto preprocessor : _preprocessors) {
+      preprocessor->fixVariables(_inst, _fixedOnes, _fixedZeros);
+      for(auto one: preprocessor->ones) {
+        change = true;
+        fixOne(one);
+      }
+      for(auto zero: preprocessor->zeros) {
+        change = true;
+        fixZero(zero);
+      }
+    }
+  }
+}
+
 void BNCSolver::config() {
   /* limita o tempo de execucao */
   _cplex.setParam(IloCplex::Param::TimeLimit, _params.timeLimit);
@@ -62,10 +102,16 @@ void BNCSolver::config() {
 
   //disable cplex curs
   _cplex.setParam(IloCplex::Param::MIP::Limits::CutsFactor, 1.0);
+
+
+  //add preprocessors
+  _preprocessors.push_back(new LightEdgePreprocessor());
+  _preprocessors.push_back(new BridgePreprocessor());
 }
 
 void BNCSolver::createCuts() {
-  _cplex.use(Cuts(_env, _x, _inst));
+  _cplex.use(UserCuts(_env, _x, _inst));
+  _cplex.use(LazyCuts(_env, _x, _inst));
   std::cerr << "cuts enabled" << std::endl;
 }
 
@@ -109,10 +155,12 @@ void BNCSolver::solve(const Instance & inst, const Params & params) {
 
   if(params.heurPrimal)
     createPrimalHeuristic();
-
+  
   config();
-  _cplex.exportModel("lp.lp"); 
+  runPreprocessors();
+  _cplex.exportModel("first.lp"); 
   processSolution();
+  _cplex.exportModel("last.lp"); 
   endTime = std::chrono::high_resolution_clock::now();
   updateReport();
 }

@@ -3,6 +3,11 @@
 #pragma once
 #include <set>
 #include <string>
+#include <utility>
+#include <string>
+#include <vector>
+#include "instance.hpp"
+#include "constants.hpp"
 
 class VariableFixer {
   public:
@@ -10,7 +15,8 @@ class VariableFixer {
   std::set<int> ones, zeros;
   std::set<std::pair<int,int>> conflicts;
 
-  virtual void fixVariables(void *solver) {
+  virtual void fixVariables(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros) {
 
   }
 };
@@ -22,7 +28,9 @@ class LightEdgePreprocessor : public VariableFixer {
   LightEdgePreprocessor() {
     name = "LightEdgePre";
   }
-  void fixVariables(void *solver);
+
+  void fixVariables(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros);
 };
 
 //fix necessary edges to keep connectivity (bridges) (run before solving)
@@ -39,10 +47,15 @@ class BridgePreprocessor : public VariableFixer{
     name = "BridgePre";
   }
 
-  bool identifyBridges(void *solver);
-  bool identifyInfeasibleEdges(void *solver);
-  bool identifyConflicts(void *solver);
-  void fixVariables(void *solver);
+  bool identifyBridges(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros);
+  bool identifyInfeasibleEdges(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros);
+  bool identifyConflicts(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros);
+
+  void fixVariables(const Instance & inst,
+    const std::set<int> &fixedOnes, const std::set<int> &fixedZeros);
 };
 
 
