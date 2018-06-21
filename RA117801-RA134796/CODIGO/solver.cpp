@@ -1,7 +1,14 @@
-#include "solver.hpp"
+#include <set>
+#include <utility>
+#include <vector>
+
 #include "cuts.hpp"
-#include "primalheur.hpp"
 #include "global.hpp"
+#include "mc_solver.hpp"
+#include "primalheur.hpp"
+#include "solver.hpp"
+
+#include "ilcplex/ilocplex.h"
 
 void BNCSolver::createBaseModel() {
   _model = IloModel(_env);
@@ -38,7 +45,46 @@ void BNCSolver::createPairConflicts() {
 }
 
 void BNCSolver::createCliqueConflicts() {
-  //TODO
+  Instance Ghat;
+
+  Ghat.size = _inst.edges.size();
+  Ghat.adjList.resize(Ghat.size);
+  Ghat.edges.reserve(_inst.conflicts.size());
+  
+  for (std::vector<std::pair<int, int>>::iterator it = _inst.conflicts.begin(); 
+          it != _inst.conflicts.end(); it++) {
+    int u = it->first, v = it->second;
+
+    int id = Ghat.edges.size();
+    Edge e (u, v);
+
+    Ghat.edges.push_back(e);
+    Ghat.edge2id[e] = id;
+    Ghat.adjList[e.u].push_back(id);
+    Ghat.adjList[e.v].push_back(id);
+  }
+
+  MCSolver mcSolver;
+
+  std::set<std::set<unsigned int>> maximalCliques = mcSolver.solve(&Ghat);
+
+  for (std::set<std::set<unsigned int>>::iterator it = maximalCliques.begin(); 
+          it != maximalCliques.end(); it++) {
+    std::set<unsigned int> maximalClique = (*it);
+
+    IloExpr lhs (_env);
+    double rhs = 1.0;
+
+    for (std::set<unsigned int>::iterator it2 = maximalClique.begin(); it2 != maximalClique.end();
+            it2++) {
+      unsigned int i = (*it2);
+
+      lhs += _x[i];
+    }
+
+    _model.add(lhs <= rhs);
+  }
+
   std::cerr << "clique" << std::endl;
 }
 
