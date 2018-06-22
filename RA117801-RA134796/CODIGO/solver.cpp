@@ -162,7 +162,7 @@ void BNCSolver::createCuts() {
 }
 
 void BNCSolver::createPrimalHeuristic() {
-    _cplex.use(PrimalHeuristic(_env, _x, _inst));
+    _cplex.use(PrimalHeuristic(_env, _x, _inst, _fixedZeros, _fixedOnes));
     std::cerr << "primal heuristic enabled" << std::endl;
 }
 
