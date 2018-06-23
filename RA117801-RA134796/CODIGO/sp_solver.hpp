@@ -23,11 +23,11 @@ class DijkstraSPSolver : public SPSolver {
                 std::vector<int> & predecessor) {
             distance = std::vector<double> (inst->size, INF);
             predecessor = std::vector<int> (inst->size, NIL);
-            std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, 
-                std::greater<std::pair<int, int>>> Q;
+            std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, 
+                std::greater<std::pair<double, int>>> Q;
 
             distance[source] = 0;
-            Q.push(std::make_pair(0, source));
+            Q.push(std::make_pair(0.0, source));
 
             while (!Q.empty()) {
                 unsigned int u = Q.top().second;
@@ -42,8 +42,8 @@ class DijkstraSPSolver : public SPSolver {
                     int e = (*it);
                     int v = inst->getOtherVertice(u, e);
                     double w = inst->cost[inst->edge2id[Edge(u, v)]];
-                    
-                    if (distance[v] > distance[u] + w) {
+ 
+                    if (distance[v] > distance[u] + w + EPS) {
                         distance[v] = distance[u] + w;
                         predecessor[v] = u;
                         Q.push(std::make_pair(distance[v], v));
