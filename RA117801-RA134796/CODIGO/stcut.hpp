@@ -3,9 +3,9 @@
 #include "global.hpp"
 #include "mf_solver.hpp"
 
-std::vector<std::vector<int>> getSubTours(const Instance & inst,
+std::set<std::vector<int>> getSubTours(const Instance & inst,
     const std::vector<double> & frac) {
-  std::vector<std::vector<int>> subtours;
+  std::set<std::vector<int>> subtours;
 
   FlowGraph g(inst.size);
   for(int i = 0; i < inst.edges.size(); i++) {
@@ -20,7 +20,37 @@ std::vector<std::vector<int>> getSubTours(const Instance & inst,
     double flow = h.DinicMaxflow(0, t);
     if(flow > 1-EPS)
       continue;
-    subtours.push_back(h.getCutSide(0));
+    std::vector<int> side = h.getCutSide(0);
+    bool complement = false;
+
+    if(side.size() < 3) {
+      complement = true;
+    }
+    else {
+      double wfrac = 0.0;
+      for(int i = 0; i < side.size(); i++) {
+        for(int j = i+1; j < side.size(); j++) {
+          int u = side[i];
+          int v = side[j];
+          std::map<Edge, int>::const_iterator it = inst.edge2id.find(Edge(u, v));
+          if(it != inst.edge2id.end()) {//found
+            wfrac += frac[it->second];
+          }
+        }
+      }
+      if(wfrac < side.size()-1+EPS)
+        complement = true;
+    }
+    if(complement) {
+      std::vector<int> otherside;
+      std::set<int> sideSet(side.begin(), side.end());
+      for(int i = 0; i < inst.size; i++) {
+        if(sideSet.count(i) == 0)
+          otherside.push_back(i);
+      }
+      side = otherside;
+    }
+    subtours.insert(side);
   }
   
   return subtours;

@@ -16,7 +16,7 @@ ILOUSERCUTCALLBACK2(UserCuts, IloBoolVarArray, x, const Instance &, inst) {
 
   NodeId node = getNodeId();
   double lpobjval = getObjValue();
-  std::cerr << "generating cuts" << std::endl;
+  std::cerr << "generating user cuts " << node << std::endl;
 
   if(gInfo.iterSep == 0) {
     gReport.firstDualBound = lpobjval;
@@ -28,20 +28,26 @@ ILOUSERCUTCALLBACK2(UserCuts, IloBoolVarArray, x, const Instance &, inst) {
   }
   gInfo.iterSep++;
 
-  for(const std::vector<int> & w : getSubTours(inst, valVecDouble)) {
+  std::set<std::vector<int>> subtours = getSubTours(inst, valVecDouble);
+  for(const std::vector<int> & w :  subtours) {
       IloExpr lhs(env);
       //find edges between vertices of w
+      double dlhs = 0;
       for(int i = 0; i < w.size(); i++) {
         for(int j = i+1; j < w.size(); j++) {
           int u = w[i];
           int v = w[j];
           std::map<Edge, int>::const_iterator it = inst.edge2id.find(Edge(u, v));
-          if(it != inst.edge2id.end())//found
+          if(it != inst.edge2id.end()) {//found
             lhs  += x[it->second];
+            dlhs += valVecDouble[it->second];
+          }
         }
       }
       int rhs = w.size()-1;
-      add(lhs <= rhs);
+      if(dlhs > rhs+EPS) {
+        add(lhs <= rhs);
+      }
       gReport.totalSTCuts++;
   }
 
@@ -78,7 +84,7 @@ ILOLAZYCONSTRAINTCALLBACK2(LazyCuts, IloBoolVarArray, x, const Instance &, inst)
 
   NodeId node = getNodeId();
   double lpobjval = getObjValue();
-  std::cerr << "generating cuts" << std::endl;
+  std::cerr << "generating lazy cuts" << std::endl;
 
   if(gInfo.iterSep == 0) {
     gReport.firstDualBound = lpobjval;
@@ -90,16 +96,20 @@ ILOLAZYCONSTRAINTCALLBACK2(LazyCuts, IloBoolVarArray, x, const Instance &, inst)
   }
   gInfo.iterSep++;
 
-  for(const std::vector<int> & w : getSubTours(inst, valVecDouble)) {
+  std::set<std::vector<int>> subtours = getSubTours(inst, valVecDouble);
+  for(const std::vector<int> & w :  subtours) {
       IloExpr lhs(env);
+      double dlhs=0;
       //find edges between vertices of w
       for(int i = 0; i < w.size(); i++) {
         for(int j = i+1; j < w.size(); j++) {
           int u = w[i];
           int v = w[j];
           std::map<Edge, int>::const_iterator it = inst.edge2id.find(Edge(u, v));
-          if(it != inst.edge2id.end())//found
+          if(it != inst.edge2id.end()) {//found
+            dlhs += valVecDouble[it->second];
             lhs  += x[it->second];
+          }
         }
       }
       int rhs = w.size()-1;

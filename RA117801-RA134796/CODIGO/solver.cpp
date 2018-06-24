@@ -126,6 +126,12 @@ void BNCSolver::runPreprocessors() {
       }
     }
   }
+  gInfo.fixedOnes = _fixedOnes.size();
+  gInfo.fixedZeros = _fixedZeros.size();
+
+  std::cerr << "fixed ones: " << gInfo.fixedOnes << std::endl;
+  std::cerr << "fixed zeros: " << gInfo.fixedZeros << std::endl;
+
 }
 
 void BNCSolver::config() {
@@ -167,17 +173,28 @@ void BNCSolver::createPrimalHeuristic() {
 }
 
 void BNCSolver::processSolution() {
+  bool invalid = false;
   if(_cplex.solve()) {
     IloNumArray xstar(_env);
     _cplex.getValues(xstar, _x);
-    _primalViable = true;
     _solution.fromIloNumArray(xstar, _inst);
-    gReport.bestPrimalBound = _solution.value;
+    if(!_solution.validate(_inst)) {
+      invalid = true;
+    }
+    else {
+      _primalViable = true;
+      _solution.invalid = false;
+      gReport.bestPrimalBound = _solution.value;
+    }
   }
   else {
+    invalid = true;
+  }
+  
+  if(invalid) {
     _primalViable = false;
     _solution.invalid = true;
-    gReport.bestPrimalBound = -INF;
+    gReport.bestPrimalBound = INF;
   }
 }
 
