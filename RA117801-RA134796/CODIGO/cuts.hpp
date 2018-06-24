@@ -17,7 +17,6 @@ ILOUSERCUTCALLBACK3(UserCuts, IloBoolVarArray, x, const Instance &, inst,
 
   NodeId node = getNodeId();
   double lpobjval = getObjValue();
-  std::cerr << "generating user cuts " << node << std::endl;
 
   if(gInfo.iterSep == 0) {
     gReport.firstDualBound = lpobjval;
@@ -88,7 +87,6 @@ ILOLAZYCONSTRAINTCALLBACK3(LazyCuts, IloBoolVarArray, x, const Instance &, inst,
 
   NodeId node = getNodeId();
   double lpobjval = getObjValue();
-  std::cerr << "generating lazy cuts" << std::endl;
 
   if(gInfo.iterSep == 0) {
     gReport.firstDualBound = lpobjval;

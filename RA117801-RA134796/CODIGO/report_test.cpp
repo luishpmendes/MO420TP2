@@ -7,5 +7,4 @@ int main(int argc, char ** argv) {
   Instance inst;
   inst.load("../../instances/exemplo.gcc");
   Report rep;
-  std::cout << rep.toString(params);
 }

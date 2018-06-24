@@ -41,7 +41,6 @@ void BNCSolver::createPairConflicts() {
   for(auto c : _inst.conflicts) {
     _model.add(_x[c.first]+_x[c.second] <= 1);
   }
-  std::cerr << "pair" << std::endl;
 }
 
 void BNCSolver::createCliqueConflicts() {
@@ -84,8 +83,6 @@ void BNCSolver::createCliqueConflicts() {
 
     _model.add(lhs <= rhs);
   }
-
-  std::cerr << "clique" << std::endl;
 }
 
 
@@ -96,7 +93,6 @@ void BNCSolver::fixOne(int edge) {
   _fixedOnes.insert(edge);
   //TODO
   _x[edge].setLB(1);
-  std::cerr << "Fixed One " << (int)edge << std::endl;
 }
 
 void BNCSolver::fixZero(int edge) {
@@ -106,8 +102,6 @@ void BNCSolver::fixZero(int edge) {
   _fixedZeros.insert(edge);
   //TODO
   _x[edge].setUB(0);
-  std::cerr << "Fixed Zero " << (int)edge  << std::endl;
-
 }
 
 void BNCSolver::runPreprocessors() {
@@ -128,10 +122,6 @@ void BNCSolver::runPreprocessors() {
   }
   gInfo.fixedOnes = _fixedOnes.size();
   gInfo.fixedZeros = _fixedZeros.size();
-
-  std::cerr << "fixed ones: " << gInfo.fixedOnes << std::endl;
-  std::cerr << "fixed zeros: " << gInfo.fixedZeros << std::endl;
-
 }
 
 void BNCSolver::config() {
@@ -164,12 +154,10 @@ void BNCSolver::config() {
 void BNCSolver::createCuts() {
   _cplex.use(UserCuts(_env, _x, _inst, _params.useOCI));
   _cplex.use(LazyCuts(_env, _x, _inst, _params.useOCI));
-  std::cerr << "cuts enabled" << std::endl;
 }
 
 void BNCSolver::createPrimalHeuristic() {
     _cplex.use(PrimalHeuristic(_env, _x, _inst, _fixedZeros, _fixedOnes));
-    std::cerr << "primal heuristic enabled" << std::endl;
 }
 
 void BNCSolver::processSolution() {

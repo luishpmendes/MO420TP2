@@ -312,7 +312,6 @@ void RandomFlipsSolutionAdapter::adapt(void *solver) {
   solution.value = INF;
   for(int i = 0; i < rep; i++) {
     flip(solver);
-    //std::cerr << "rp " << curSolution.value << std::endl;
     if((!viable && curViable)||curSolution.value < solution.value) {
       solution=curSolution;
       viable=curViable;
