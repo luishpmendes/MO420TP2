@@ -25,7 +25,7 @@ def runInstancesFolder(folder, params):
   clearFolder(folder)
   for inst in sorted(glob.glob("%s/*.gcc"%(folder))):
     print(inst)
-    if os.system("%s %s %s %s %s %s %s %s %s"%(BNC_EXEC,
+    if os.system("%s %s %s %s %s %s %s %s"%(BNC_EXEC,
                    params["typeExec"], params["model"], params["timeLimit"],
                    params["heur"], inst, params["info"], params["oci"])):
       return False
