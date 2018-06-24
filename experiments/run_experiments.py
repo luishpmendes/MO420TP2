@@ -13,9 +13,8 @@ def getParams(folder):
   params["model"] = paramsList[1]
   params["timeLimit"] = paramsList[2]
   params["heur"]  = paramsList[3]
-  params["oci"] = paramsList[4]
-  params["preproc"] = paramsList[5]
-  params["info"] = "y"
+  params["info"] = paramsList[4]
+  params["oci"] = paramsList[5]
   f.close()
   return params
 
@@ -28,8 +27,7 @@ def runInstancesFolder(folder, params):
     print(inst)
     if os.system("%s %s %s %s %s %s %s %s %s"%(BNC_EXEC,
                    params["typeExec"], params["model"], params["timeLimit"],
-                   params["heur"], inst, params["oci"], params["preproc"],
-                   params["info"])):
+                   params["heur"], inst, params["info"], params["oci"])):
       return False
   return True
 
