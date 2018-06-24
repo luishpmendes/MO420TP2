@@ -210,7 +210,5 @@ ILOHEURISTICCALLBACK4(PrimalHeuristic, IloBoolVarArray, x, const Instance &, ins
             }
         }
     }
-
-    std::cerr << "primalHeuristic" << std::endl;
 }
 

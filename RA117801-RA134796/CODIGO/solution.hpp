@@ -7,6 +7,7 @@
 #include "mergefind.hpp"
 #include "constants.hpp"
 #include "global.hpp"
+#include "params.hpp"
 
 #include "ilcplex/ilocplex.h"
 class Solution {
@@ -61,9 +62,10 @@ class Solution {
     return true;
   }
 
-  std::string toString(const Instance & inst, bool printValue=false,
+  std::string toString(const Instance & inst, const Params & params, bool printValue=false,
     double threshold=0.1) const {
     std::string ret;
+    ret += params.toString()+"\n";
     if(invalid) {
       if(printValue)
         ret += std::to_string(INF)+"\n";
@@ -84,10 +86,10 @@ class Solution {
     return ret;
   }
 
-  void write(const Instance & inst, std::string filename) {
+  void write(const Instance & inst, const Params & params, std::string filename) {
     std::ofstream file;
     file.open(filename);
-    file << toString(inst);
+    file << toString(inst, params);
     file.close();
   }
 
