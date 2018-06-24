@@ -19,7 +19,7 @@ def getParams(folder):
   return params
 
 def clearFolder(folder):
-  os.system("rm %s/*.info %s/*.est %s/*.sol"%(folder, folder, folder))
+  os.system("rm -f %s/*.info %s/*.est %s/*.sol"%(folder, folder, folder))
 
 def runInstancesFolder(folder, params):
   clearFolder(folder)
