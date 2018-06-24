@@ -199,7 +199,7 @@ int FlowGraph::CutDFS(int u, std::vector<bool> & vis) {
   int count = 1;
   vis[u] = true;
   for(const FlowEdge & e : _adj[u]) {
-    if(e.C > EPS && e.flow+EPS < e.C)
+    if(e.C > -EPS && e.flow+EPS < e.C)
       count += CutDFS(e.v, vis);
   }
   return count;

@@ -130,7 +130,7 @@ void occuts (const IloNumArray & val, const Instance & inst, std::set<std::set<u
             }
 
             /* x violates the corresponding odd-cycle inequality if and only if w(U) < 1/2 */
-            if (isOddCycle && wU < 0.5) {
+            if (isOddCycle && wU+EPS < 0.5) {
                 oddCycles.insert(oddCycle);
             }
         }
