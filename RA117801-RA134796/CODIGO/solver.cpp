@@ -162,8 +162,8 @@ void BNCSolver::config() {
 }
 
 void BNCSolver::createCuts() {
-  _cplex.use(UserCuts(_env, _x, _inst));
-  _cplex.use(LazyCuts(_env, _x, _inst));
+  _cplex.use(UserCuts(_env, _x, _inst, _params.useOCI));
+  _cplex.use(LazyCuts(_env, _x, _inst, _params.useOCI));
   std::cerr << "cuts enabled" << std::endl;
 }
 

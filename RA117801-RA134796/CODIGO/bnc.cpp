@@ -45,14 +45,25 @@ int main (int argc, char * argv[]) {
     else
       params.filename = "../../instances/exemplo.gcc"; 
 
+    /*parametros extras para testes*/
+    /* genInfo determina se informaçoes extras serão geradas em um arquivocom
+     * extensao .info, default false*/
+    if(argc > 6)
+      params.genInfo = atoi(argv[6]);
+    /*useOCI determina se os cortes do tipo OddCycle serão usados,
+     * default, true*/
+    if(argc > 7)
+      params.useOCI = atoi(argv[7]);
+
     Instance inst;
     inst.load(params.filename.c_str());
 
     BNCSolver solver;
     solver.solve(inst, params);
-    solver.getSolution().write(inst, params.filename+".sol");
+    solver.getSolution().write(inst, params, params.filename+".sol");
     gReport.write(params, params.filename+".est");
-    //gInfo.write(filename+".info");
+    if(params.genInfo)
+      gInfo.write(params.filename+".info");
     return 0;
 }
 

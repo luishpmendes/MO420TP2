@@ -4,7 +4,8 @@
 #include "occut.hpp"
 #include "stcut.hpp"
 
-ILOUSERCUTCALLBACK2(UserCuts, IloBoolVarArray, x, const Instance &, inst) {
+ILOUSERCUTCALLBACK3(UserCuts, IloBoolVarArray, x, const Instance &, inst,
+    bool, useOCI) {
   IloEnv env = getEnv();
 
   IloNumArray val(env);
@@ -53,26 +54,29 @@ ILOUSERCUTCALLBACK2(UserCuts, IloBoolVarArray, x, const Instance &, inst) {
 
   std::set<std::set<unsigned int>> oddCycles;
 
-  occuts(val, inst, oddCycles);
+  if(useOCI) {
+    occuts(val, inst, oddCycles);
 
-  for (std::set<std::set<unsigned int>>::iterator it = oddCycles.begin(); it != oddCycles.end(); it++) {
-    std::set<unsigned int> oddCycle = (*it);
+    for (std::set<std::set<unsigned int>>::iterator it = oddCycles.begin(); it != oddCycles.end(); it++) {
+      std::set<unsigned int> oddCycle = (*it);
 
-    IloExpr lhs (env);
-    double rhs = (((double) oddCycle.size()) - 1.0) / 2.0;
+      IloExpr lhs (env);
+      double rhs = (((double) oddCycle.size()) - 1.0) / 2.0;
 
-    for (std::set<unsigned int>::iterator it2 = oddCycle.begin(); it2 != oddCycle.end(); it2++) {
-      unsigned int i = (*it2);
+      for (std::set<unsigned int>::iterator it2 = oddCycle.begin(); it2 != oddCycle.end(); it2++) {
+        unsigned int i = (*it2);
 
-      lhs += x[i];
+        lhs += x[i];
+      }
+
+      add(lhs <= rhs);
+      gReport.totalOCCuts++;
     }
-
-    add(lhs <= rhs);
-    gReport.totalOCCuts++;
   }
 }
 
-ILOLAZYCONSTRAINTCALLBACK2(LazyCuts, IloBoolVarArray, x, const Instance &, inst) {
+ILOLAZYCONSTRAINTCALLBACK3(LazyCuts, IloBoolVarArray, x, const Instance &, inst,
+    bool, useOCI) {
   IloEnv env = getEnv();
 
   IloNumArray val(env);
@@ -119,22 +123,24 @@ ILOLAZYCONSTRAINTCALLBACK2(LazyCuts, IloBoolVarArray, x, const Instance &, inst)
 
   std::set<std::set<unsigned int>> oddCycles;
 
-  occuts(val, inst, oddCycles);
+  if(useOCI) {
+    occuts(val, inst, oddCycles);
 
-  for (std::set<std::set<unsigned int>>::iterator it = oddCycles.begin(); it != oddCycles.end(); it++) {
-    std::set<unsigned int> oddCycle = (*it);
+    for (std::set<std::set<unsigned int>>::iterator it = oddCycles.begin(); it != oddCycles.end(); it++) {
+      std::set<unsigned int> oddCycle = (*it);
 
-    IloExpr lhs (env);
-    double rhs = (((double) oddCycle.size()) - 1.0) / 2.0;
+      IloExpr lhs (env);
+      double rhs = (((double) oddCycle.size()) - 1.0) / 2.0;
 
-    for (std::set<unsigned int>::iterator it2 = oddCycle.begin(); it2 != oddCycle.end(); it2++) {
-      unsigned int i = (*it2);
+      for (std::set<unsigned int>::iterator it2 = oddCycle.begin(); it2 != oddCycle.end(); it2++) {
+        unsigned int i = (*it2);
 
-      lhs += x[i];
+        lhs += x[i];
+      }
+
+      add(lhs <= rhs);
+      gReport.totalOCCuts++;
     }
-
-    add(lhs <= rhs);
-    gReport.totalOCCuts++;
   }
 }
 

@@ -16,14 +16,27 @@ class Params {
   bool heurPrimal;
   std::string filename;
 
+  bool genInfo;
+  bool useOCI;
+
   Params() {
     typeExec = 'c';
     model = 'n';
     timeLimit = 60;
     heurPrimal = false;
+    genInfo = false;
+    useOCI = true;
   }
-  std::string toString() {
+  std::string toString() const{
     std::string r;
+    r += std::to_string(typeExec)+" ";
+    r += std::to_string(model)+" ";
+    r += std::to_string(timeLimit)+" ";
+    if(heurPrimal)
+      r += "1 ";
+    else
+      r += "0 ";
+    r += filename;
 
     return r;
   }
