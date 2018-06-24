@@ -42,7 +42,8 @@ def runExperiment(folder):
   return True
 
 def main():
-  exp_list = ["test"]
+  exp_list = ["bnc_clique_oci", "bnc_clique_oci_heur",  "bnc_clique_semoci",
+  "bnc_clique_semoci_heur",  "bnc_pair_oci",  "bnc_pair_semoci"]
   for exp in exp_list:
     if not runExperiment(exp):
       print("aborted")
